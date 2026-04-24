@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <!-- CRITICAL: correct viewport for iPhone — viewport-fit=cover handles the notch -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+
+    <!-- iPhone "Add to Home Screen" / PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tishky Zerin">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- Prevents phone number auto-detection messing with layout -->
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- Theme color for browser chrome -->
+    <meta name="theme-color" content="#2E2E2E" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#F3EFE6" media="(prefers-color-scheme: light)">
+
+    <title>Tishky Zerin — خانوبەرەکان</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ── RTL base ── */
+        .irow        { flex-direction: row-reverse; text-align: right; }
+        .irow .iicon { order: 1; }
+        .sec-title .ct { margin-left: 0; margin-right: auto; }
+        .pcard-top   { text-align: right; }
+        .pbadges     { justify-content: flex-end; }
+        .pcard-bot   { flex-direction: row-reverse; }
+        .rented-ribbon { right: auto; left: -20px; transform: rotate(-35deg); }
+        .mhead       { flex-direction: row-reverse; }
+        .mhead h3    { flex-direction: row-reverse; display:flex; align-items:center; gap:.4rem; }
+        .rblock-title{ flex-direction: row-reverse; }
+        .modal-acts  { flex-direction: row-reverse; }
+        .ploc        { flex-direction: row-reverse; }
+        .ploc i      { margin-left: .3rem; margin-right: 0; }
+        .pmeta       { flex-direction: row-reverse; }
+        .arow-loc    { flex-direction: row-reverse; }
+        .arow-meta   { flex-direction: row-reverse; }
+        .arow-renter { flex-direction: row-reverse; }
+        .aacts       { flex-direction: row-reverse; }
+        .card-title  { flex-direction: row-reverse; }
+        .fbar        { flex-direction: row-reverse; }
+        .tgl-grp     { flex-direction: row-reverse; }
+        .sec-title   { flex-direction: row-reverse; }
+        .stats-row .sbox { text-align: right; }
+        .fg label    { text-align: right; }
+        .fg input, .fg select, .fg textarea { text-align: right; direction: rtl; }
+        .fbar input  { text-align: right; direction: rtl; }
+
+        /* On mobile the pcard-bot should stack vertically and not reverse */
+        @media (max-width: 600px) {
+            .pcard-bot { flex-direction: column !important; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="app-header">
+    <nav class="container">
+        <a class="logo" href="index.html" dir="ltr">
+            <div class="logo-icon"><i class="fas fa-building"></i></div>
+            <span style="color:var(--text);">Tishky</span><span class="hi">Zerin</span>
+        </a>
+        <div class="nav-links" style="flex-direction:row-reverse;">
+            <button class="theme-btn" id="themebtn" title="گۆڕینی ڕووکار"><i class="fas fa-sun"></i></button>
+            <button class="btn-logout" id="logoutBtn" style="display:none;"><i class="fas fa-arrow-right-from-bracket"></i> <span class="nav-label">دەرچوون</span></button>
+            <a href="admin.html" id="adminLink" style="display:none;"><i class="fas fa-gauge-high"></i> <span class="nav-label">داشبۆرد</span></a>
+            <a href="login.html" id="loginLink"><i class="fas fa-lock"></i> <span class="nav-label">چوونەژوورەوە</span></a>
+            <a href="index.html" class="on"><i class="fas fa-search"></i> <span class="nav-label">خانوبەرەکان</span></a>
+        </div>
+    </nav>
+</header>
+
+<div class="page-body">
+<div class="container">
+
+    <!-- Stats (admin only) -->
+    <div class="stats-row" id="statsRow" style="display:none;">
+        <div class="sbox ca" style="text-align:right;"><div class="sl">کۆی گشتی</div><div class="sn" id="sTotal">0</div></div>
+        <div class="sbox cav" style="text-align:right;"><div class="sl">بەردەست</div><div class="sn" id="sAvail">0</div></div>
+        <div class="sbox cr" style="text-align:right;"><div class="sl">کرێدراو</div><div class="sn" id="sRented">0</div></div>
+        <div class="sbox crt" style="text-align:right;"><div class="sl">بە کرێ</div><div class="sn" id="sRent">0</div></div>
+        <div class="sbox cs" style="text-align:right;"><div class="sl">بۆ فرۆشتن</div><div class="sn" id="sSell">0</div></div>
+    </div>
+
+    <!-- View toggle: Card / List — only visible when logged in -->
+    <div class="view-bar" id="viewBar" style="display:none;">
+        <button class="view-btn on" id="btnCardView" onclick="switchView('card')">
+            <i class="fas fa-th-large"></i> کارتەکان
+        </button>
+        <button class="view-btn" id="btnListView" onclick="switchView('list')">
+            <i class="fas fa-list-check"></i> بەڕێوەبردن
+        </button>
+    </div>
+
+    <!-- Auth notice for guests -->
+    <div class="auth-notice" id="authNotice">
+        <i class="fas fa-circle-info"></i>
+        <span>بۆ بەڕێوەبردنی خانوبەرەکان (کرێ، فرۆشتن، سڕینەوە) ، <a onclick="window.location.href='login.html'">بچۆرە ژوورەوە</a>.</span>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="card">
+        <div class="card-title" style="flex-direction:row-reverse;"><i class="fas fa-sliders"></i> فلتەر کردنی خانوبەرە</div>
+
+        <div style="margin-bottom:.85rem;">
+            <div class="tgl-grp" style="flex-direction:row-reverse;">
+                <button class="tgl all on" onclick="setMode('all',this)"><i class="fas fa-th-large"></i> هەموو</button>
+                <button class="tgl rent"   onclick="setMode('rent',this)"><i class="fas fa-key"></i> بە کرێ</button>
+                <button class="tgl sell"   onclick="setMode('sell',this)"><i class="fas fa-tag"></i> بۆ فرۆشتن</button>
+            </div>
+        </div>
+
+        <div class="fbar" style="flex-direction:row-reverse;">
+            <input type="text" id="fLoc" placeholder="گەڕان بە شوێن…" oninput="applyFilter()" style="text-align:right;direction:rtl;flex:1;min-width:140px;">
+            <select id="fType" onchange="applyFilter()" style="text-align:right;">
+                <option value="">هەموو جۆرەکان</option>
+                <option value="apartment">🏢 شووقە</option>
+                <option value="house">🏠 خانوو</option>
+                <option value="land">🌍 زەوی</option>
+            </select>
+            <select id="fStatus" onchange="applyFilter()" style="text-align:right;">
+                <option value="available">✅ بەردەست تەنها</option>
+                <option value="">هەموو دۆخەکان</option>
+                <option value="rented">🔑 کرێدراو</option>
+                <option value="sold">⛔ فرۆشراو</option>
+            </select>
+            <input type="number" id="fMin" placeholder="کەمترین" style="width:100%;text-align:right;" oninput="applyFilter()">
+            <input type="number" id="fMax" placeholder="زۆرترین" style="width:100%;text-align:right;" oninput="applyFilter()">
+        </div>
+    </div>
+
+    <!-- Results count -->
+    <div class="sec-title" style="flex-direction:row-reverse;">
+        <span class="ct" id="cnt">0</span>
+        ئەنجامەکان <i class="fas fa-building"></i>
+    </div>
+
+    <!-- Card grid (public view) -->
+    <div class="pgrid" id="grid">
+        <div class="empty"><i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە…</div>
+    </div>
+
+    <!-- Admin list view -->
+    <div class="alist" id="alist" style="display:none;"></div>
+
+</div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-bg" id="modal">
+    <div class="mbox">
+        <div class="mhead" style="flex-direction:row-reverse;">
+            <h3 style="direction:rtl;"><i class="fas fa-building"></i> <span id="mtitle">وردەکاری خانوبەرە</span></h3>
+            <button class="mx" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mbody" id="mbody"></div>
+    </div>
+</div>
+
+<!-- Renter add/edit modal -->
+<div class="modal-bg" id="renterModal">
+    <div class="mbox">
+        <div class="mhead" style="flex-direction:row-reverse;">
+            <h3 style="direction:rtl;"><i class="fas fa-user-clock"></i> زانیاری کرێچی</h3>
+            <button class="mx" onclick="closeRenterModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mbody">
+            <input type="hidden" id="rPropId">
+            <div class="fg"><label style="text-align:right;">ناوی کرێچی *</label>
+                <input type="text" id="rName" placeholder="ناوی تەواوی کرێچی" style="text-align:right;direction:rtl;"></div>
+            <div class="fg"><label style="text-align:right;">ژمارەی کرێچی *</label>
+                <input type="tel" id="rPhone" placeholder="07501234567" style="text-align:right;direction:ltr;"></div>
+            <div class="fg"><label style="text-align:right;">کرێ لە</label>
+                <input type="date" id="rSince"></div>
+            <button class="btn-add" onclick="saveRenter()" style="margin-top:.5rem;">
+                <i class="fas fa-floppy-disk"></i> پاشەکەوتکردن و کرێدراو نیشاندان
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View renter detail modal -->
+<div class="modal-bg" id="viewModal">
+    <div class="mbox">
+        <div class="mhead" style="flex-direction:row-reverse;">
+            <h3 style="direction:rtl;"><i class="fas fa-id-card"></i> وردەکاری کرێچی</h3>
+            <button class="mx" onclick="closeViewModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mbody" id="viewBody"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

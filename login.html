@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tishky Zerin">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#2E2E2E" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#F3EFE6" media="(prefers-color-scheme: light)">
+
+    <title>Tishky Zerin — چوونەژوورەوە</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* RTL adjustments for login */
+        .lfield i { left: auto; right: 0.85rem; }
+        .lfield input {
+            padding: 0.8rem 2.6rem 0.8rem 0.85rem;
+            text-align: right; direction: ltr; /* email/password stays LTR */
+        }
+        /* Email field keep LTR but align right */
+        #email { direction: ltr; text-align: left; }
+        #password { direction: ltr; text-align: left; padding-left: 2.8rem; padding-right: 2.6rem; }
+
+        .toggle-pw {
+            position: absolute;
+            left: 0.85rem; right: auto;
+            top: 50%; transform: translateY(-50%);
+            background: none; border: none;
+            color: var(--text-dim); cursor: pointer;
+            font-size: 0.9rem; padding: 0;
+            display: flex; align-items: center;
+            min-width: 32px; min-height: 32px;
+            justify-content: center;
+        }
+        .toggle-pw:hover { color: var(--primary); }
+
+        .debug-msg { margin-top: 0.5rem; font-size: 0.72rem; color: var(--text-muted); text-align: center; word-break: break-all; min-height: 1rem; }
+        .lbox h2, .lbox .sub { text-align: center; }
+        .lbox { box-shadow: 0 0 0 1px rgba(99,102,241,0.18), 0 24px 60px rgba(0,0,0,0.55); border-color: rgba(99,102,241,0.2); }
+        .lbtn { background: linear-gradient(135deg, #6366f1, #818cf8); box-shadow: 0 4px 18px rgba(99,102,241,0.35); }
+        .lbtn:hover { opacity: 0.92; box-shadow: 0 6px 24px rgba(99,102,241,0.5); }
+    </style>
+</head>
+<body>
+<div class="login-pg">
+    <div class="lbox">
+        <div class="llogorow">
+            <div class="logo-icon"><i class="fas fa-building"></i></div>
+            <span>Tishky<span class="hi">Zerin</span></span>
+        </div>
+        <h2>چوونەژوورەوەی بەڕێوەبەر</h2>
+        <p class="sub">تکایە بچۆرە ژوورەوە بۆ بەڕێوەبردنی خانوبەرەکان</p>
+
+        <!-- Use div not form to avoid iOS submit quirks -->
+        <div id="loginForm">
+            <div class="lfield">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="email" placeholder="ئیمەیڵ" autocomplete="email"
+                       inputmode="email" enterkeyhint="next">
+            </div>
+            <div class="lfield">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="وشەی نهێنی"
+                       autocomplete="current-password" enterkeyhint="go">
+                <button type="button" class="toggle-pw" onclick="togglePw()" aria-label="نیشاندانی وشەی نهێنی">
+                    <i class="fas fa-eye" id="eyeIcon"></i>
+                </button>
+            </div>
+            <button class="lbtn" id="lbtn" onclick="doLogin()">
+                <i class="fas fa-right-to-bracket"></i> چوونەژوورەوە
+            </button>
+            <div class="lerr" id="lerr" style="display:none;"></div>
+            <div class="debug-msg" id="dbg"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+// Apply saved theme
+if (localStorage.getItem('theme') === 'light')
+    document.documentElement.setAttribute('data-theme', 'light');
+
+// Redirect if already logged in
+supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session) window.location.href = 'admin.html';
+});
+
+function togglePw() {
+    const inp = document.getElementById('password');
+    const ico = document.getElementById('eyeIcon');
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        ico.className = 'fas fa-eye-slash';
+    } else {
+        inp.type = 'password';
+        ico.className = 'fas fa-eye';
+    }
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+});
+
+async function doLogin() {
+    const btn  = document.getElementById('lbtn');
+    const err  = document.getElementById('lerr');
+    const dbg  = document.getElementById('dbg');
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+        err.innerHTML     = '<i class="fas fa-circle-exclamation"></i> ئیمەیڵ و وشەی نهێنی پێویستن.';
+        err.style.display = 'flex';
+        return;
+    }
+
+    btn.disabled  = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە…';
+    err.style.display = 'none';
+    dbg.textContent   = '';
+
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+        if (error) {
+            err.innerHTML     = '<i class="fas fa-circle-exclamation"></i> ئیمەیڵ یان وشەی نهێنی هەڵەیە.';
+            err.style.display = 'flex';
+            dbg.textContent   = error.message;
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> چوونەژوورەوە';
+            return;
+        }
+
+        window.location.href = 'admin.html';
+
+    } catch (ex) {
+        err.innerHTML     = '<i class="fas fa-circle-exclamation"></i> کێشەی پەیوەندی.';
+        err.style.display = 'flex';
+        dbg.textContent   = String(ex);
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-right-to-bracket"></i> چوونەژوورەوە';
+    }
+}
+</script>
+</body>
+</html>

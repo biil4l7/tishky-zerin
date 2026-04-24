@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tishky Zerin">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#2E2E2E" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#F3EFE6" media="(prefers-color-scheme: light)">
+
+    <title>Tishky Zerin — بەڕێوەبەری</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .irow        { flex-direction: row-reverse; text-align: right; }
+        .mhead       { flex-direction: row-reverse; }
+        .mhead h3    { flex-direction: row-reverse; display:flex; align-items:center; gap:0.4rem; }
+        .rblock-title{ flex-direction: row-reverse; }
+        .arow-loc    { flex-direction: row-reverse; }
+        .arow-meta   { flex-direction: row-reverse; }
+        .arow-renter { flex-direction: row-reverse; }
+        .aacts       { flex-direction: row-reverse; }
+        .sec-title .ct { margin-left: 0; margin-right: auto; }
+        .fg label    { text-align: right; }
+        .fg input, .fg select, .fg textarea { text-align: right; direction: rtl; }
+        .card-title  { flex-direction: row-reverse; }
+        .fbar        { flex-direction: row-reverse; }
+        .tgl-grp     { flex-direction: row-reverse; }
+        .stats-row .sbox { text-align: right; }
+        .sec-title   { flex-direction: row-reverse; }
+        .modal-acts  { flex-direction: row-reverse; }
+
+        .btn-logout {
+            background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.08));
+            border: 1px solid rgba(239,68,68,0.3);
+        }
+        .btn-add {
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+        }
+    </style>
+</head>
+<body>
+
+<header class="app-header">
+    <nav class="container">
+        <a class="logo" href="admin.html">
+            <div class="logo-icon"><i class="fas fa-building"></i></div>
+            Tishky<span class="hi">Zerin</span>
+            <span class="chip">بەڕێوەبەر</span>
+        </a>
+        <div class="nav-links" style="flex-direction:row-reverse;">
+            <button class="theme-btn" id="themebtn" title="گۆڕینی ڕووکار"><i class="fas fa-sun"></i></button>
+            <button class="btn-logout" id="logoutBtn"><i class="fas fa-arrow-right-from-bracket"></i> <span class="nav-label">دەرچوون</span></button>
+            <a href="admin.html" class="on"><i class="fas fa-gauge-high"></i> <span class="nav-label">داشبۆرد</span></a>
+            <a href="index.html"><i class="fas fa-search"></i> <span class="nav-label">دۆزینەوە</span></a>
+        </div>
+    </nav>
+</header>
+
+<div class="page-body">
+<div class="container">
+
+    <!-- Stats -->
+    <div class="stats-row" id="statsRow">
+        <div class="sbox ca"  style="text-align:right;"><div class="sl">کۆی گشتی</div><div class="sn" id="sTotal">0</div></div>
+        <div class="sbox cav" style="text-align:right;"><div class="sl">بەردەست</div><div class="sn" id="sAvail">0</div></div>
+        <div class="sbox cr"  style="text-align:right;"><div class="sl">کرێدراو</div><div class="sn" id="sRented">0</div></div>
+        <div class="sbox crt" style="text-align:right;"><div class="sl">بە کرێ</div><div class="sn" id="sRent">0</div></div>
+        <div class="sbox cs"  style="text-align:right;"><div class="sl">بۆ فرۆشتن</div><div class="sn" id="sSell">0</div></div>
+    </div>
+
+    <!-- Add Property -->
+    <div class="card">
+        <div class="card-title" style="flex-direction:row-reverse;"><i class="fas fa-plus-circle"></i> زیادکردنی خانوبەرە</div>
+        <form id="addForm">
+            <div class="form-row">
+                <div class="fg">
+                    <label>شوێن *</label>
+                    <input type="text" id="fLocation" placeholder="کوچە، ناوچە، شار" required>
+                </div>
+                <div class="fg">
+                    <label>ناوی خاوەن *</label>
+                    <input type="text" id="fOwner" placeholder="خاوەنی خانوبەرە" required>
+                </div>
+            </div>
+            <div class="form-row3">
+                <div class="fg">
+                    <label>ژمارەی خاوەن *</label>
+                    <input type="tel" id="fPhone" placeholder="+964 …" required style="direction:ltr;text-align:left;">
+                </div>
+                <div class="fg">
+                    <label>قەبارە</label>
+                    <input type="text" id="fSize" placeholder="بۆ نموونە: ١٢٠ م٢، ٣ ژوور">
+                </div>
+                <div class="fg">
+                    <label>نرخ (IQD) *</label>
+                    <input type="number" id="fPrice" placeholder="بۆ نموونە: 250000" required min="0" style="direction:ltr;text-align:left;">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="fg">
+                    <label>جۆری خانوبەرە *</label>
+                    <select id="fType" required>
+                        <option value="apartment">🏢 شووقە</option>
+                        <option value="house">🏠 خانوو</option>
+                        <option value="land">🌍 زەوی</option>
+                    </select>
+                </div>
+                <div class="fg">
+                    <label>جۆری لیستە *</label>
+                    <select id="fListingType" required>
+                        <option value="rent">🔑 بە کرێ</option>
+                        <option value="sell">🏷️ بۆ فرۆشتن</option>
+                    </select>
+                </div>
+            </div>
+            <div class="fg">
+                <label>تێبینی / وەسف</label>
+                <textarea id="fDesc" placeholder="هەر زانیارییەکی زیادەی دەربارەی خانوبەرەکە…"></textarea>
+            </div>
+            <button type="submit" class="btn-add" id="addBtn">
+                <i class="fas fa-plus"></i> زیادکردنی خانوبەرە
+            </button>
+        </form>
+    </div>
+
+    <!-- Manage Properties -->
+    <div class="card">
+        <div class="sec-title" style="flex-direction:row-reverse;margin-bottom:0.9rem;">
+            <span class="ct" id="mCnt">0</span>
+            خانوبەرەکان <i class="fas fa-list-check" style="color:var(--primary);"></i>
+        </div>
+
+        <!-- Quick filter -->
+        <div class="fbar" style="flex-direction:row-reverse;margin-bottom:1rem;">
+            <input type="text" id="adminSearch" placeholder="گەڕان بە شوێن…" oninput="adminRender()" style="flex:1;min-width:130px;text-align:right;direction:rtl;">
+            <div class="tgl-grp" style="flex-direction:row-reverse;">
+                <button class="tgl all on" onclick="adminFilter('all',this)"><i class="fas fa-th-large"></i> هەموو</button>
+                <button class="tgl rent"   onclick="adminFilter('rent',this)"><i class="fas fa-key"></i> کرێ</button>
+                <button class="tgl sell"   onclick="adminFilter('sell',this)"><i class="fas fa-tag"></i> فرۆشتن</button>
+            </div>
+        </div>
+
+        <div class="alist" id="alist">
+            <div class="empty"><i class="fas fa-spinner fa-spin"></i> چاوەڕوان بە…</div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<!-- Renter Modal -->
+<div class="modal-bg" id="renterModal">
+    <div class="mbox">
+        <div class="mhead" style="flex-direction:row-reverse;">
+            <h3 style="flex-direction:row-reverse;display:flex;align-items:center;gap:0.4rem;"><i class="fas fa-user-clock" style="color:var(--primary);"></i> زانیاری کرێچی</h3>
+            <button class="mx" onclick="closeRenterModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mbody">
+            <input type="hidden" id="rPropId">
+            <div class="fg"><label>ناوی کرێچی *</label>
+                <input type="text" id="rName" placeholder="ناوی تەواوی کرێچی" style="text-align:right;direction:rtl;"></div>
+            <div class="fg"><label>ژمارەی کرێچی *</label>
+                <input type="tel" id="rPhone" placeholder="+964 …" style="direction:ltr;text-align:left;"></div>
+            <div class="fg"><label>کرێ لە</label>
+                <input type="date" id="rSince"></div>
+            <button class="btn-add" onclick="saveRenter()" style="margin-top:.5rem;">
+                <i class="fas fa-floppy-disk"></i> پاشەکەوتکردن و کرێدراو نیشاندان
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- View Renter Modal -->
+<div class="modal-bg" id="viewModal">
+    <div class="mbox">
+        <div class="mhead" style="flex-direction:row-reverse;">
+            <h3 style="flex-direction:row-reverse;display:flex;align-items:center;gap:0.4rem;"><i class="fas fa-id-card" style="color:var(--primary);"></i> وردەکاری کرێچی</h3>
+            <button class="mx" onclick="closeViewModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="mbody" id="viewBody"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="admin-script.js"></script>
+<script>
+supabase.auth.getSession().then(({ data: { session } }) => {
+    if (!session) window.location.href = 'login.html';
+});
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+});
+</script>
+</body>
+</html>
